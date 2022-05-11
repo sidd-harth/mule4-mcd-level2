@@ -1,0 +1,11 @@
+id: Log Client Location
+name: Log Client Location
+description: Policy for logging client location using client-ip address
+category: Custom
+type: custom
+resourceLevelSupported: true
+encryptionSupported: false
+standalone: true
+requiredCharacteristics: []
+providedCharacteristics: []
+configuration: []

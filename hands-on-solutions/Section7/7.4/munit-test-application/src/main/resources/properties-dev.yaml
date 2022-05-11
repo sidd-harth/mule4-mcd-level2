@@ -1,0 +1,14 @@
+quotes:
+  protocol: 'https'
+  host: 'api.kanye.rest'
+  path: '/'
+  
+httpbin:
+  protocol: 'https'
+  host: 'httpbin.org'
+  path: '/status'
+  
+reqres:
+  protocol: 'https'
+  host: 'reqres.in'
+  path: '/api/users'

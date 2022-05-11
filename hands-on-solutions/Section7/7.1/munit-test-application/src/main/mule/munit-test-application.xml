@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<http:listener-config
+		name="HTTP_Listener_config"
+		doc:name="HTTP Listener config"
+		doc:id="a6f34847-c359-4e69-a2c2-dc07d5530500">
+		<http:listener-connection
+			host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="3b7c94f7-e2e4-4407-8eb5-b1baf52af216"
+		file="properties-${env}.yaml" />
+	<flow
+		name="httpbin-flow"
+		doc:id="ddd359ea-d4d3-4bf2-872d-c0caf1ec486b">
+		<http:request
+			method="GET"
+			doc:name="HTTPBin - Status Code"
+			doc:id="af4b30b3-c10a-4350-8c5a-988aa808b662"
+			url="${httpbin.protocol}://${httpbin.host}${httpbin.path}/{httpCode}"
+			target="httpBin">
+			<error-mapping
+				sourceType="HTTP:FORBIDDEN"
+				targetType="APP:TESTING_FORBIDDEN" />
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"httpCode" : vars.statusCode
+}]]]></http:uri-params>
+		</http:request>
+		<error-handler>
+			<on-error-propagate
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Propagate"
+				doc:id="9bc753c4-d251-43cf-95ad-686d0e234535"
+				type="APP:TESTING_FORBIDDEN">
+				<set-payload
+					value="Testing Forbidden"
+					doc:name="Testing Forbidden"
+					doc:id="68b5a337-4ed7-43c2-95af-397e22470af0" />
+				<set-variable
+					value="403"
+					doc:name="httpStatusCode"
+					doc:id="add88d09-1d61-4d79-ac6b-4c659606028a"
+					variableName="httpStatusCode" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow
+		name="reqres-flow"
+		doc:id="0bc29500-f345-4796-8626-a1ea4c327ba5">
+		<http:request
+			method="POST"
+			doc:name="ReqRes - Create User API"
+			doc:id="18b4b823-144c-4b64-badc-d68b0d3e8382"
+			url="${reqres.protocol}://${reqres.host}${reqres.path}"
+			target="reqres" />
+	</flow>
+	<flow
+		name="quotes-flow"
+		doc:id="c2486b3c-8494-4eed-ae09-8c3c7e2cb805">
+		<http:request
+			method="GET"
+			doc:name="Quotes - Random"
+			doc:id="4e12876c-730a-4cc4-b609-f0a14370509f"
+			url="${quotes.protocol}://${quotes.host}${quotes.path}"
+			target="quotes" />
+	</flow>
+	<flow
+		name="mashup-flow"
+		doc:id="60c3b840-19b8-4508-ad54-b92049ac961b">
+		<http:listener
+			doc:name="Listener"
+			doc:id="4454461c-6a39-4b99-9b9a-177e37b8fbd1"
+			config-ref="HTTP_Listener_config"
+			path="/testing">
+			<http:error-response
+				statusCode="#[vars.httpStatusCode]">
+				<http:body><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-variable
+			value="#[attributes.queryParams.statusCode]"
+			doc:name="StatusCode"
+			doc:id="f862389a-3213-4550-bb4e-b736129cbc6d"
+			variableName="statusCode" />
+		<!-- <flow-ref doc:name="quotes-flow" doc:id="7fe9b4bf-c81b-4efa-ab86-0741829fbcb1" 
+			name="quotes-flow" /> -->
+		<flow-ref
+			doc:name="reqres-flow"
+			doc:id="443ee6a7-0bb2-46b3-94a6-9fc8cc4860e2"
+			name="reqres-flow" />
+		<flow-ref
+			doc:name="quotes-flow"
+			doc:id="c83500d1-c66d-4ca0-99a5-c8c176a6f2ef"
+			name="quotes-flow" />
+		<flow-ref
+			doc:name="httpbin-flow"
+			doc:id="99575698-aa9d-429b-a3e9-3651cd32ebd3"
+			name="httpbin-flow" />
+		<ee:transform
+			doc:name="Transform Message"
+			doc:id="d27fe944-1375-4b68-8525-661b9c4d2d34">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: vars.reqres.fname ++ ' ' ++ vars.reqres.lname,
+	job: upper(vars.reqres.role),
+	quote: vars.quotes.quote,
+	status: vars.statusCode as Number
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

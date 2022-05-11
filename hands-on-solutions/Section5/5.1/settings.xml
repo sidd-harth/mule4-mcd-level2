@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd"> 
+  
+   <localRepository>Z:\MCD2_Udemy\MCD2_M2_REPO\repository</localRepository>
+  
+  <servers>
+
+  	<server>
+      <id>Super-Organization-App</id>
+      <username>~~~Client~~~</username>
+      <password>d186dea6918b4ea1b9f1c7dff5d4acac~?~6E718705a2214a8C92a4ca5D608fdDC6</password>
+    </server>
+     
+  </servers>
+
+  
+ <profiles>
+     <profile>
+         <id>Mule</id>
+         <activation>
+             <activeByDefault>true</activeByDefault>
+         </activation>
+         <repositories>
+             <repository>
+                 <id>mulesoft-releases</id>
+                 <name>MuleSoft Repository</name>
+                 <url>http://repository.mulesoft.org/releases/</url>
+                 <layout>default</layout>
+             </repository>
+         </repositories>
+     </profile>
+     <profile>
+     <id>archetype-repository</id>
+     <repositories>
+       <repository>
+         <id>archetype</id>
+         <name>Mule Repository</name>
+         <url>https://repository-master.mulesoft.org/nexus/content/repositories/public</url>
+         <releases>
+           <enabled>true</enabled>
+           <checksumPolicy>fail</checksumPolicy>
+         </releases>
+         <snapshots>
+           <enabled>true</enabled>
+           <checksumPolicy>warn</checksumPolicy>
+         </snapshots>
+       </repository>
+     </repositories>
+   </profile>
+ </profiles>
+  
+</settings>
+

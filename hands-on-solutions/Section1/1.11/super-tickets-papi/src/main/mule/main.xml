@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-tickets-data-by-bid" doc:id="053a84b2-0270-4b80-893f-aa4bf9c180a7" >
+		<ee:transform>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ticket: {
+    booking_id: "BID7890",
+    film_name: "Avengers - Infinity War",
+    cinema_name: "Acme IMAX",
+    screen_name: "Audi 7",
+    seats: "RR - H4",
+    imdb_rating: 8.9,
+    language: "English",
+    date_time: "Tue, 08 Feb, 2022 | 04:26 PM"
+  },
+  character: {
+    id: "MARVEL0002",
+    name: "Thanos",
+    birthplace: "Titan",
+    publisher: "Marvel Comics",
+    movies: [
+      {
+        name: "Avengers Endgame,",
+        year: 2019
+      }, 
+      {
+        name: "Guardians of the Galaxy",
+        year: 2014
+      }
+    ]
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

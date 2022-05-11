@@ -1,0 +1,17 @@
+tls:
+  keystore:
+      type: "pkcs12"
+      path: "certs/super-tickets-papi.p12"
+      alias: "mule-server"
+      keyPassword: "superSecretPassword"
+      password: "superSecretPassword"
+      
+      
+api:
+  port: '8082'
+  id: '17739628'
+  majorVersion: 'v1'
+  groupId: 'bfb5a8a4-30ed-47b8-88c8-5764a308838e'
+  artifactId: 'super-tickets-papi'
+  version: '1.0.0'
+  specification: 'resource::${api.groupId}:${api.artifactId}:${api.version}:oas:zip:super-ticket-papi.yaml'

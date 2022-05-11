@@ -1,0 +1,65 @@
+id: Log Client Location
+name: Log Client Location
+description: Policy for logging client location using client-ip address
+category: Custom
+type: custom
+resourceLevelSupported: true
+encryptionSupported: false
+standalone: true
+requiredCharacteristics: []
+providedCharacteristics: []
+configuration:
+  - propertyName: logClientLocationEnabled
+    name: Log Client Location
+    description: If enabled, the policy will log client location
+    type: boolean
+    optional: true
+    defaultValue: false
+
+  - propertyName: ipAddress
+    name: Client IP Address
+    description: |
+      Mule expression for extracting the IP Address of the Client Application.e.g. #[attributes.headers['x-forwarded-for']]
+    type: expression
+    optional: true
+    sensitive: false
+    allowMultiple: false
+    dependsOnKey: logClientLocationEnabled
+    dependsOnValue: true
+
+
+##### Optional Hard Code Logging ######
+    
+  - propertyName: optionalHardCode
+    name: Log Hard Coded Location
+    description: If enabled, allows to log any data entered by user
+    type: boolean
+    optional: true
+
+  - propertyName: hardCodedLocation
+    name: Hard Code Location Data
+    description: Type in location data
+    type: string
+    dependsOnKey: optionalHardCode
+    dependsOnValue: true
+    optional: true
+    defaultValue: Type any location data....
+
+
+  - propertyName: logType
+    name: Log Options
+    description: Choose either to log Country name or log multiple details (city, state, country, capital and timezone data)
+    type: radio
+    options: #Defines radio button group
+    - name: Log Country Name
+      description: Check, if only country name needs to logged.
+      value: 'COUNTRY'
+      optional: false
+    - name: Log Multiple Details
+      description: Check to log city, state, country, capital and timezone data.
+      value: 'MULTIPLE'
+      optional: false
+    optional: true
+    dependsOnKey: logClientLocationEnabled
+    dependsOnValue: true
+    sensitive: false

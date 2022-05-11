@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:module-liveness-check="http://www.mulesoft.org/schema/mule/module-liveness-check"
+
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munitext="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core      http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit     http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/module-liveness-check http://www.mulesoft.org/schema/mule/module-liveness-check/current/mule-module-liveness-check.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+    <munit:config name="assertion-test.xml"/>
+
+    <munit:test name="test-set-payload-hardcoded-flow" description="">
+        <munit:execution>
+            <flow-ref name="set-payload-hardcoded-flow" />
+        </munit:execution>
+        <munit:validation>
+            <munitext:assert-that expression="#[payload]" is="#[MunitTools::equalTo('Wubba Lubba Dub Dub')]" message="Oops this should have been true"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="test-set-payload-hardcoded-two-times-flow" description="">
+        <munit:execution>
+            <flow-ref name="set-payload-hardcoded-two-times-flow"/>
+        </munit:execution>
+        <munit:validation>
+            <munitext:assert-that expression="#[payload]" is="#[MunitTools::equalTo('Wubba Lubba Dub Dub Dub Dub')]" message="Oops this should have been true"/>
+        </munit:validation>
+    </munit:test>
+
+    <flow name="set-payload-hardcoded-flow">
+        <module-liveness-check:set-payload-hardcoded/>
+    </flow>
+
+    <flow name="set-payload-hardcoded-two-times-flow">
+        <module-liveness-check:set-payload-hardcoded-two-times/>
+    </flow>
+</mule>

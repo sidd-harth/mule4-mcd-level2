@@ -1,0 +1,8 @@
+tls:
+  keystore:
+      type: "pkcs12"
+      path: "certs/super-tickets-papi.p12"
+      alias: "mule-server"
+      
+api:
+  id: '17739628'

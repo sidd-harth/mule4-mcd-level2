@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config
+		name="HTTP_Listener_config"
+		doc:name="HTTP Listener config"
+		doc:id="53743437-7d06-4d65-b3bc-d65e3ff77f2f">
+		<http:listener-connection
+			host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<flow
+		name="custom-api-policy-testFlow"
+		doc:id="e14c15e0-6a9b-4f69-9019-dd211970d261">
+		<http:listener
+			doc:name="Listener"
+			doc:id="6a0e907a-d7e3-4a1a-80f9-c36666a35a9d"
+			config-ref="HTTP_Listener_config"
+			path="/location" />
+		<set-variable value="#[attributes.headers.'x-forwarded-for']" doc:name="ipAddressVariable" doc:id="c86004dc-a522-433b-892e-ef2f12c28027" variableName="ipAddressVariable"/>
+		<http:request
+			method="GET"
+			doc:name="Request"
+			doc:id="311b03f7-0cf9-47fe-92e6-4c50a0a54250"
+			url="https://ipapi.co/{clientIP}/json/"
+			target="ipResponse">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"clientIP" : vars.ipAddressVariable
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="76c56aff-b3e7-48a2-8d55-28ab87f55930" message="#[%dw 2.0
+&#10;output text/plain
+&#10;---
+&#10;'\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\nRequest Originated from ' ++ upper(vars.ipResponse.city) ++ ' city, within '  ++ upper(vars.ipResponse.region) ++ ' state of ' ++ upper(vars.ipResponse.country_name) ++ ' (' ++ vars.ipResponse.country_capital ++ ') ' ++ 'in ' ++ upper(vars.ipResponse.timezone) ++  ' timezone.' ++ '\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*']"/>
+		<set-payload value="#[%dw 2.0
+&#10;output text/plain
+&#10;---
+&#10;'\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\nRequest Originated from ' ++ upper(vars.ipResponse.city) ++ ' city, within '  ++ upper(vars.ipResponse.region) ++ ' state of ' ++ upper(vars.ipResponse.country_name) ++ ' (' ++ vars.ipResponse.country_capital ++ ') ' ++ 'in ' ++ upper(vars.ipResponse.timezone) ++  ' timezone.' ++ '\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*']" doc:name="Set Payload" doc:id="04451ddc-8de6-4bb9-acb6-4b1886bc52d9" />
+	</flow>
+</mule>

@@ -1,0 +1,1 @@
+check main.xml in super-tickets-papi for commented code for choice compensation logic

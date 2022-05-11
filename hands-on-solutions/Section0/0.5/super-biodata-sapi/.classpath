@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.mule.tooling.MULE_PROJECT_LIB"/>
+	<classpathentry kind="con" path="org.mule.tooling.API_SPEC_LIB/bfb5a8a4-30ed-47b8-88c8-5764a308838e/super-biodata-sapi/1.0.0"/>
+	<classpathentry kind="con" path="org.mule.tooling.API_SPEC_LIB/c738e3c8-08cf-462d-bb9a-1553ebf5008e/super-biodata-sapi/1.0.1"/>
+	<classpathentry kind="con" path="org.mule.tooling.API_SPEC_LIB/53a7ba06-a8d3-4536-9fb5-5c689add373f/super-bio-sapi/1.0.0"/>
+	<classpathentry kind="con" path="MULE_LIB/com.mulesoft.connectors/mule-mongodb-connector/6.3.5"/>
+	<classpathentry kind="con" path="MULE_LIB/org.mule.modules/mule-apikit-module/1.5.8"/>
+	<classpathentry kind="con" path="MULE_LIB/org.mule.connectors/mule-sockets-connector/1.2.2"/>
+	<classpathentry kind="con" path="MULE_LIB/org.mule.connectors/mule-http-connector/1.6.0"/>
+	<classpathentry exported="true" kind="con" path="MULE_RUNTIME/org.mule.tooling.server.4.4.0.ee"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src/main/mule"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="src" path="src/test/munit"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

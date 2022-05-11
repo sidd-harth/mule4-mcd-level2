@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+	<secure-properties:config
+		name="securePropertiesConfig"
+		doc:name="Secure Properties Config"
+		doc:id="323f8fa5-ec68-4dcf-9c11-f884ae34951b"
+		file="properties-apmq-secure.yaml"
+		key="${secure.key.apmq}">
+		<secure-properties:encrypt
+			algorithm="Blowfish" />
+	</secure-properties:config>
+
+	<anypoint-mq:config
+		name="anypointMQConfig"
+		doc:name="Anypoint MQ Config"
+		doc:id="39089c97-7015-4f22-964c-ed60bab0198f">
+		<anypoint-mq:connection
+			url="${secure::mq.url}"
+			clientId="${secure::mq.client_id}"
+			clientSecret="${secure::mq.client_secret}" />
+	</anypoint-mq:config>
+	<anypoint-mq:circuit-breaker
+		name="apmqCircuitBreaker"
+		tripTimeout="20"
+		doc:name="Circuit breaker"
+		doc:id="619d6c84-f5d9-4abd-97d2-5a5fd682a622"
+		onErrorTypes="HTTP:CONNECTIVITY"
+		errorsThreshold="5"
+		tripTimeoutUnit="SECONDS" />
+	<flow
+		name="super-app-eapiFlow"
+		doc:id="437b4e57-e000-4243-96eb-2814e617b6db">
+		<anypoint-mq:subscriber
+			doc:name="Subscriber"
+			doc:id="0ea7ca7d-7a07-448c-8583-47c5e2066adb"
+			config-ref="anypointMQConfig"
+			destination="${secure::mq.destination}"
+			acknowledgementMode="MANUAL"
+			acknowledgementTimeout="10"
+			acknowledgementTimeoutUnit="SECONDS"
+			circuitBreaker="apmqCircuitBreaker" />
+		<logger
+			level="INFO"
+			doc:name="Hello FLow"
+			doc:id="44b220e6-641f-47b4-9afd-e246b862914c"
+			message="Hello FLow" />
+		<tracing:with-correlation-id
+			doc:name="With CorrelationID"
+			doc:id="9b60d67c-16e0-4af2-891e-803e748a5466"
+			correlationId="#[attributes.properties.correlationId]">
+			<ee:transform
+				doc:name="Transform Message"
+				doc:id="c17c52e6-c5f9-435b-abca-20eb2e0c73fd">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.bid,
+	num: payload.mobile
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable
+				value="#[attributes.ackToken]"
+				doc:name="ackToken"
+				doc:id="fe51bca8-9de5-46ce-8ee7-aa70a44c20d4"
+				variableName="ackToken" />
+			<!-- <raise-error
+				doc:name="APP:MANUAL_ERROR"
+				doc:id="1239b7a4-2477-4c3f-a590-784c157d1731"
+				type="APP:MANUAL_ERROR"
+				description="APP MANUAL_ERROR" /> -->
+			<http:request
+				method="POST"
+				doc:name="HTTPBin Service"
+				doc:id="c9379321-5b72-4c6e-96a3-424b54081aaa"
+				url="https://httpbin.org/post" />
+			<logger
+				level="INFO"
+				doc:name="payload"
+				doc:id="7f87af5a-0845-4000-9ef7-5f1a42c69e03"
+				message="#[payload]" />
+			<anypoint-mq:ack
+				doc:name="Ack"
+				doc:id="5f8f7297-7fb7-478a-8174-65abfd0c4929"
+				config-ref="anypointMQConfig"
+				ackToken="#[vars.ackToken]" />
+		</tracing:with-correlation-id>
+
+		<error-handler>
+			<on-error-propagate
+				enableNotifications="false"
+				logException="false"
+				doc:name="On Error Propagate"
+				doc:id="c9d2ff8c-6901-433b-95e0-209f8c144130"
+				type="HTTP:NOT_FOUND">
+				<logger
+					level="INFO"
+					doc:name="Logger"
+					doc:id="24814ee4-1014-4496-845b-db72a57876fd"
+					message="HTTP NOT FOUND - Message is Acknowledged" />
+			</on-error-propagate>
+			<on-error-propagate
+				enableNotifications="false"
+				logException="false"
+				doc:name="On Error Propagate"
+				doc:id="49e33b72-86df-466d-8fc0-28851b5c7719"
+				type="HTTP:CONNECTIVITY">
+				<logger
+					level="INFO"
+					doc:name="Logger"
+					doc:id="a0104179-1314-4957-9159-0a2c1c8ceefa"
+					message="HTTP CONNECTIVITY - Message is NOT Acknowledged" />
+				<anypoint-mq:nack
+					doc:name="Nack"
+					doc:id="bf3efe1b-f211-4df0-a2a5-3fdf60b4bfbd"
+					config-ref="anypointMQConfig"
+					ackToken="#[vars.ackToken]" />
+			</on-error-propagate>
+			<on-error-propagate
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Propagate"
+				doc:id="3adde0f8-b933-4c92-9aa3-8e13fe0bb138"
+				type="ANY">
+				<logger
+					level="INFO"
+					doc:name="Logger"
+					doc:id="9d191a15-aac1-4f08-9a85-9e1d5d94c559"
+					message="ANY Error - Message is NOT Acknowledged" />
+				<anypoint-mq:nack
+					doc:name="Nack"
+					doc:id="3574a212-9db9-49db-bdc7-e2b267f76ea4"
+					config-ref="anypointMQConfig"
+					ackToken="#[vars.ackToken]" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+
+</mule>

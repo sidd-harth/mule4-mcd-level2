@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="16075575-c57f-4763-98f7-0d2fe68df7f0" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="xml-validation-demoFlow" doc:id="5dbdca68-3a0e-4278-a58b-daa96cccc6a9" >
+		<http:listener doc:name="HTTP POST /xml" doc:id="4bf8a9ab-ae2d-41a1-b999-f5fed040bf8f" config-ref="HTTP_Listener_config" path="/xml">
+			<http:error-response statusCode="#[vars.httpStatusCode]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<xml-module:validate-schema doc:name="Validate XML schema" doc:id="0693b06c-5016-4f29-894b-0023a5c07cb6" schemas="XmlSchema.xsd"/>
+		<set-payload value="XML is valid" doc:name="Set Payload" doc:id="96b1c5e0-5399-4afe-9185-309b76f63bea" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="48922f6d-55d3-4d6f-99c3-cd89aa138b0e" type="XML-MODULE:SCHEMA_NOT_HONOURED">
+				<set-variable value="400" doc:name="Set Variable" doc:id="de1c05ef-9271-4ea5-b636-94b6c5514f32" variableName="httpStatusCode"/>
+				<ee:transform doc:name="Transform Message" doc:id="ba61f783-a6e9-490f-ad76-fb21c8399d4b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	msg: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

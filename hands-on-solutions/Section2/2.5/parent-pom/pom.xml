@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>bfb5a8a4-30ed-47b8-88c8-5764a308838e</groupId>
+		<artifactId>master-bom</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../master-bom/pom.xml</relativePath>
+	</parent>
+
+	<groupId>bfb5a8a4-30ed-47b8-88c8-5764a308838e</groupId>
+	<artifactId>parent-pom</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>parent-pom</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<app.semver>4.4.0</app.semver>
+		<app.runtime>4.4.0-20211227</app.runtime>
+		<mule.maven.plugin.version>3.5.2</mule.maven.plugin.version>
+
+		<app.env>${env}</app.env>
+		<app.prefix>${app.env}-</app.prefix>
+		<app.suffix>-siddharth</app.suffix>
+		<app.name>${app.prefix}${project.artifactId}${app.suffix}</app.name>		
+	</properties>
+
+	<build>
+		<pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<resources>
+						<resource>
+							<directory>src/main/resources</directory>
+							<filtering>false</filtering>
+						</resource>
+						<resource>
+							<directory>src/main/resources</directory>
+							<filtering>true</filtering>
+							<includes>
+								<include>properties.yaml</include>
+							</includes>
+						</resource>
+					</resources>
+					<!-- <nonFilteredFileExtensions> <nonFilteredFileExtension>.yaml</nonFilteredFileExtension> 
+						</nonFilteredFileExtensions> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+				    <cloudHubDeployment>
+				      <uri>https://anypoint.mulesoft.com</uri>
+				      <muleVersion>${app.semver}</muleVersion>
+				      <connectedAppClientId>${ap.conn.app.client.id}</connectedAppClientId>
+				      <connectedAppClientSecret>${ap.conn.app.client.secret}</connectedAppClientSecret>
+				      <connectedAppGrantType>client_credentials</connectedAppGrantType>
+				      <applicationName>${app.name}</applicationName>
+				      <environment>${app.env}</environment>
+				      <region>us-east-2</region>
+				      <deploymentTimeout>900000</deploymentTimeout>
+				      <workers>1</workers>
+				      <workerType>MICRO</workerType>
+				      <objectStoreV2>true</objectStoreV2>
+				      <properties>
+				        <env>${app.env}</env>
+				        <secure.key>${secure.key}</secure.key>
+				        <anypoint.platform.client_id>${ap.env.client_id}</anypoint.platform.client_id>
+				        <anypoint.platform.client_secret>${ap.env.client_secret}</anypoint.platform.client_secret>
+				        <anypoint.platform.config.analytics.agent.enabled>true</anypoint.platform.config.analytics.agent.enabled>
+				        <anypoint.platform.visualizer.displayName>${project.artifactId}</anypoint.platform.visualizer.displayName>
+				        <anypoint.platform.visualizer.layer>${api.visualizer.layer}</anypoint.platform.visualizer.layer>
+				      </properties>
+				    </cloudHubDeployment>
+				 </configuration>
+			</plugin>
+		</plugins>
+	</pluginManagement>
+	</build>
+
+
+
+</project>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:super-heros-bio-data-sapi="http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi"
+	xmlns:super-heros-movies-data-sapi="http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi/current/mule-super-heros-movies-data-sapi.xsd
+http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi/current/mule-super-heros-bio-data-sapi.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow
+		name="get-biodata-by-cid"
+		doc:id="13b7f831-779a-41f8-ba0d-3d68d37085a5">
+		<super-heros-bio-data-sapi:get-biodata-by-cid
+			doc:name="Get BioData by CID"
+			doc:id="dca1e9a9-41e4-4ef6-9f47-5da1f60e8a98"
+			config-ref="superHerosBioDataSAPIConfig"
+			id="#[vars.CID]"
+			target="superBioData" />
+	</flow>
+	<flow
+		name="get-movies-data-by-cid"
+		doc:id="7350b8e9-463b-4fb5-b867-bedea85639a2">
+		<super-heros-movies-data-sapi:fetch-movies-data-using-cid
+			doc:name="Fetch Movies Data using CID"
+			doc:id="0c8efdb4-8701-4b76-8ae4-28a091059368"
+			config-ref="superHerosMoviesDataSAPIConfig"
+			id="#[vars.CID]"
+			target="superMovies" />
+	</flow>
+	<flow
+		name="get-booking-data-by-bid"
+		doc:id="01bbe7c0-f9bf-42db-bf8d-a2f465d7dee3">
+		<http:request
+			method="GET"
+			doc:name="Get Booking Data using BID"
+			doc:id="258f1f38-09db-4c24-b9b8-f3bad4b10f27"
+			config-ref="bookingsDataByBID"
+			path="/{bookingID}"
+			target="bookingData">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"bookingID" : vars.BID
+}]]]></http:uri-params>
+		</http:request>
+		<choice
+			doc:name="Choice"
+			doc:id="82d34509-1211-45d0-a1c3-8679ab1083b3">
+			<when
+				expression="#[%dw 2.0&#10;import first from dw::core::Strings&#10;output application/java&#10;var bookingDataComicValue = vars.bookingData.film.comic first 2&#10;---&#10;vars.CID contains bookingDataComicValue]">
+				<logger
+					level="INFO"
+					doc:name="Request CID is from Marvel Comic"
+					doc:id="68654f25-3f69-41f6-99fb-c41727fd975b"
+					message="Request CID is from Marvel Comic" />
+			</when>
+			<otherwise>
+				<raise-error
+					doc:name="Request CID is NOT from Marvel Comic"
+					doc:id="f4d92b7f-5035-4888-954d-702f5980da57"
+					type="APP:CID_DOESNT_MATCH_COMIC"
+					description="Request CID is NOT from Marvel Comic" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow
+		name="get-tickets-data-by-bid"
+		doc:id="053a84b2-0270-4b80-893f-aa4bf9c180a7">
+		<logger
+			level="INFO"
+			doc:name="Log Correlation ID"
+			doc:id="11d405d3-6f71-44b3-92c0-c2dca07b7168"
+			message="#['\n********************************************\n' ++ 'Flow started with correlation id - ' ++ correlationId ++  '\n********************************************\n']" />
+		<scatter-gather
+			doc:name="Scatter-Gather"
+			doc:id="1dfadbf5-419b-4347-9cb8-f3345f54a06c">
+			<route>
+				<flow-ref
+					doc:name="get-booking-data-by-bid"
+					doc:id="d684bb39-68d0-4fdd-8741-c51561dee402"
+					name="get-booking-data-by-bid" />
+			</route>
+			<route>
+				<flow-ref
+					doc:name="get-biodata-by-cid"
+					doc:id="1443e976-e499-445a-9ee1-ac012ff0bb99"
+					name="get-biodata-by-cid" />
+			</route>
+			<route>
+				<flow-ref
+					doc:name="get-movies-data-by-cid"
+					doc:id="d7125e5c-c4e4-4284-a2a9-2c558cf714d7"
+					name="get-movies-data-by-cid" />
+			</route>
+		</scatter-gather>
+		<ee:transform>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	ticket: {
+		booking_id: vars.bookingData.booking_id,
+		film_name: vars.bookingData.film.film_name,
+		cinema_name: ((vars.bookingData.cinema.cinema_name default "") ++ ', ' ++ vars.bookingData.cinema.city) ++ ', ' ++ vars.bookingData.cinema.country,
+		screen_name: vars.bookingData.cinema.screen_name,
+		seats: vars.bookingData.cinema.seats,
+		imdb_rating: vars.bookingData.film.imdb_rating,
+		language: vars.bookingData.film.language,
+		date_time: (vars.bookingData.film.showing[0].date_time as DateTime) as String {format: "E, dd MMM, yyyy | hh:mm a, ZZZZ"}
+	},
+	character: {
+		id: vars.superBioData.id,
+		name: vars.superBioData.name,
+		birthplace: vars.superBioData.birthplace,
+		publisher: vars.superBioData.publisher,
+		movies: vars.superMovies.movies map ( superMovies , indexOfMovie ) -> {
+			name: superMovies.name,
+			year: superMovies.year
+		}
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d6fad1db-9566-4ef4-866b-86243e1162db" type="MULE:COMPOSITE_ROUTING">
+				<set-variable value="#[output application/json --- error.errorMessage.payload.failures pluck($$)]" doc:name="failedRouteIndex" doc:id="c6e71789-673a-4b07-8186-10a7cd58780f" variableName="failedRouteIndex"/>
+				<set-variable value="#[output application/json --- error.errorMessage.payload.results pluck($$)]" doc:name="successRouteIndex" doc:id="b9fe89e1-19df-452a-a18f-619af4150524" variableName="successRouteIndex"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

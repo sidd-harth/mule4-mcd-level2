@@ -1,0 +1,24 @@
+For PROD env deployment
+
+mvn deploy -DmuleDeploy \
+-Dap.conn.app.client.id=c8b40e995b284a60afa565a7bc9b907b \
+-Dap.conn.app.client.secret=E4e5299FE5794edaB9733273ea48576c \
+-Denv=prod \
+-Dsecure.key=SecureKey007 \
+-Dap.env.client_id=e8991f52dba24203bfcd0f3093a01fd3 \
+-Dap.env.client_secret=6C737104Cf38407f836EFbaE68a944F9 \
+-Dapp.prefix=
+
+
+<<<<<< REPLACE THE VALUES >>>>>>>
+
+
+For DEV env deployment
+
+mvn deploy -DmuleDeploy \
+-Dap.conn.app.client.id=c8b40e995b284a60afa565a7bc9b907b \
+-Dap.conn.app.client.secret=E4e5299FE5794edaB9733273ea48576c \
+-Denv=dev \
+-Dsecure.key=SecureKey007 \
+-Dap.env.client_id=e8991f52dba24203bfcd0f3093a01fd3 \
+-Dap.env.client_secret=6C737104Cf38407f836EFbaE68a944F9 \

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow
+		name="api-liveness-flow"
+		doc:id="fb68e576-0215-4e0d-9a39-ac13e3e4c9d9">
+		<http:listener
+			doc:name="Listener /live"
+			doc:id="f3e8e3ee-4a4b-403f-b003-3aa673bd46a3"
+			config-ref="apiHttpListenerConfig"
+			path="/live">
+			<http:error-response>
+				<http:body><![CDATA[DEAD]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-payload
+			value="LIVE"
+			doc:name="LIVE"
+			doc:id="fba91042-8b1e-4f88-8833-baa3c1511d29" />
+	</flow>
+	<flow
+		name="api-readiness-flow"
+		doc:id="72cd1a6d-97a3-4621-b032-3fa0048f8e8b">
+		<http:listener
+			doc:name="Listener"
+			doc:id="39250385-2e2d-4737-9775-0623658e2bb9"
+			config-ref="apiHttpListenerConfig"
+			path="/ready">
+			<http:error-response>
+				<http:body><![CDATA[DEAD]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<flow-ref
+			doc:name="dependency-liveness-status"
+			doc:id="b883d988-57be-4a56-9ed5-d58879d1e915"
+			name="dependency-liveness-status" />
+		<set-payload value="READY" doc:name="READY" doc:id="37b37c0d-45d9-4ced-b38e-32c4feb9abfa" />
+	</flow>
+	<sub-flow
+		name="dependency-liveness-status"
+		doc:id="dea44810-b686-45ad-96fa-02093d9ef41c">
+		<http:request
+			method="GET"
+			doc:name="Liveness - Super Movies SAPI"
+			doc:id="2811d291-c235-4565-89ab-4598b70b3002"
+			url="http://super-movies-sapi-siddharth.us-e2.cloudhub.io/live"
+			responseTimeout="5000">
+			<http:response-validator>
+				<http:success-status-code-validator
+					values="200..399" />
+			</http:response-validator>
+		</http:request>
+		<http:request
+			method="GET"
+			doc:name="Liveness - Super BioData SAPI"
+			doc:id="e59dfca7-a937-40eb-9ef8-df02ca0f8bec"
+			url="http://super-biodata-sapi-siddharth.us-e2.cloudhub.io/live"
+			responseTimeout="5000">
+			<http:response-validator>
+				<http:success-status-code-validator
+					values="200..399" />
+			</http:response-validator>
+		</http:request>
+		<http:request
+			method="GET"
+			doc:name="Liveness - Booking REST API"
+			doc:id="288ceb48-4e6b-433b-9672-11c15b43e10f"
+			url="https://onlineman477-eval-prod.apigee.net/booking/live"
+			responseTimeout="5000">
+			<http:response-validator>
+				<http:success-status-code-validator
+					values="200..399" />
+			</http:response-validator>
+		</http:request>
+	</sub-flow>
+</mule>

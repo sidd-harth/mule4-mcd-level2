@@ -1,0 +1,4 @@
+{
+  "minMuleVersion": "4.4.0",
+  "secureProperties": ["secure.key", "anypoint.platform.client_secret", "secure.key.apmq"]
+}

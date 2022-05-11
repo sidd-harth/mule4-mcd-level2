@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>bfb5a8a4-30ed-47b8-88c8-5764a308838e</groupId>
+    <artifactId>log-client-location</artifactId>
+    <version>1.0.0</version>
+
+    <name>Log Client Location</name>
+    <description>Policy for logging client location using client-ip address</description>
+
+    <packaging>mule-policy</packaging>
+
+    <properties>
+        <mule.maven.plugin.version>3.3.6</mule.maven.plugin.version>
+        <exchange.url>https://maven.anypoint.mulesoft.com/api/v1/organizations/bfb5a8a4-30ed-47b8-88c8-5764a308838e/maven</exchange.url>
+        <http.policy.transform.extension>3.1.0</http.policy.transform.extension>
+    </properties>
+
+    <dependencies>
+        <!-- This extension allows to easily update HTTP attributes from a policy -->
+        <!-- Full documentation: https://docs.mulesoft.com/api-manager/2.x/http-policy-transform -->     
+       <!--  <dependency>
+            <groupId>com.mulesoft.anypoint</groupId>
+            <artifactId>mule-http-policy-transform-extension</artifactId>
+            <version>${http.policy.transform.extension}</version>
+            <classifier>mule-plugin</classifier>
+            HTTP Connector is excluded to avoid packaging it with the policy, since the application's HTTP connector is used
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mule.connectors</groupId>
+                    <artifactId>mule-http-connector</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>      -->
+    </dependencies>
+         
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.mule.tools.maven</groupId>
+                <artifactId>mule-maven-plugin</artifactId>
+                <version>${mule.maven.plugin.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>upload-template</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <repositoryId>Super-Organization-App</repositoryId>
+                            <url>${exchange.url}</url>
+                            <file>${project.basedir}/${project.artifactId}.yaml</file>
+                            <generatePom>false</generatePom>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <packaging>yaml</packaging>
+                            <classifier>policy-definition</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>Super-Organization-App</id>
+            <name>Corporate Repository</name>
+            <url>${exchange.url}</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mule-plugin</id>
+            <name>Mule Repository</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>

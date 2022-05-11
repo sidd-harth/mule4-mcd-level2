@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module
+	name="liveness-check"
+	prefix="liveness-check"
+	doc:description="This module relies in runtime provided components"
+
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/module"
+	xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:tns="http://www.mulesoft.org/schema/mule/liveness-check"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+           http://www.mulesoft.org/schema/mule/module http://www.mulesoft.org/schema/mule/module/current/mule-module.xsd
+           http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+           http://www.mulesoft.org/schema/mule/liveness-check http://www.mulesoft.org/schema/mule/liveness-check/current/mule-liveness-check.xsd
+           http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<http:request-config
+		name="livenessHttpRequestConfig" />
+
+	<operation
+		name="endpoint-liveness-check"
+		doc:description="Test Liveness of the Endpoint">
+		<parameters>
+			<parameter
+				name="url"
+				displayName="URL"
+				type="string"
+				use="REQUIRED" />
+			<parameter
+				name="responeTimeout"
+				displayName="Response Timeout"
+				type="number"
+				use="OPTIONAL"
+				defaultValue="1000"
+				tab="Response" />
+		</parameters>
+
+		<body>
+			<http:request
+				config-ref="livenessHttpRequestConfig"
+				method="GET"
+				url="#[vars.url]"
+				responseTimeout="#[vars.responeTimeout]">
+				<mule:error-mapping
+					sourceType="HTTP:PARSING"
+					targetType="LIVENESS-CHECK:PARSING" />
+				<mule:error-mapping
+					sourceType="HTTP:TIMEOUT"
+					targetType="LIVENESS-CHECK:TIMEOUT" />
+				<mule:error-mapping
+					sourceType="HTTP:SECURITY"
+					targetType="LIVENESS-CHECK:SECURITY" />
+				<mule:error-mapping
+					sourceType="HTTP:CONNECTIVITY"
+					targetType="LIVENESS-CHECK:CONNECTIVITY" />
+				<mule:error-mapping
+					sourceType="HTTP:BAD_REQUEST"
+					targetType="LIVENESS-CHECK:BAD_REQUEST" />
+				<mule:error-mapping
+					sourceType="HTTP:UNAUTHORIZED"
+					targetType="LIVENESS-CHECK:UNAUTHORIZED" />
+				<mule:error-mapping
+					sourceType="HTTP:FORBIDDEN"
+					targetType="LIVENESS-CHECK:FORBIDDEN" />
+				<mule:error-mapping
+					sourceType="HTTP:METHOD_NOT_ALLOWED"
+					targetType="LIVENESS-CHECK:METHOD_NOT_ALLOWED" />
+				<mule:error-mapping
+					sourceType="HTTP:NOT_FOUND"
+					targetType="LIVENESS-CHECK:NOT_FOUND" />
+				<mule:error-mapping
+					sourceType="HTTP:NOT_ACCEPTABLE"
+					targetType="LIVENESS-CHECK:NOT_ACCEPTABLE" />
+				<mule:error-mapping
+					sourceType="HTTP:UNSUPPORTED_MEDIA_TYPE"
+					targetType="LIVENESS-CHECK:UNSUPPORTED_MEDIA_TYPE" />
+				<mule:error-mapping
+					sourceType="HTTP:TOO_MANY_REQUESTS"
+					targetType="LIVENESS-CHECK:TOO_MANY_REQUESTS" />
+				<mule:error-mapping
+					sourceType="HTTP:INTERNAL_SERVER_ERROR"
+					targetType="LIVENESS-CHECK:INTERNAL_SERVER_ERROR" />
+				<mule:error-mapping
+					sourceType="HTTP:SERVICE_UNAVAILABLE"
+					targetType="LIVENESS-CHECK:SERVICE_UNAVAILABLE" />
+				<mule:error-mapping
+					sourceType="HTTP:RETRY_EXHAUSTED"
+					targetType="LIVENESS-CHECK:RETRY_EXHAUSTED" />
+			</http:request>
+		</body>
+
+		<output
+			type="string"
+			doc:description="Payload's output" />
+
+		<errors>
+			<error type="PARSING" />
+			<error type="TIMEOUT" />
+			<error type="SECURITY" />
+			<error type="CONNECTIVITY" />
+			<error type="BAD_REQUEST" />
+			<error type="UNAUTHORIZED" />
+			<error type="FORBIDDEN" />
+			<error type="METHOD_NOT_ALLOWED" />
+			<error type="NOT_FOUND" />
+			<error type="NOT_ACCEPTABLE" />
+			<error type="UNSUPPORTED_MEDIA_TYPE" />
+			<error type="TOO_MANY_REQUESTS" />
+			<error type="INTERNAL_SERVER_ERROR" />
+			<error type="SERVICE_UNAVAILABLE" />
+			<error type="RETRY_EXHAUSTED" />
+		</errors>
+	</operation>
+
+</module>

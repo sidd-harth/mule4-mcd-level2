@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:super-heros-bio-data-sapi="http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi" xmlns:super-heros-movies-data-sapi="http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi http://www.mulesoft.org/schema/mule/super-heros-movies-data-sapi/current/mule-super-heros-movies-data-sapi.xsd
+http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi http://www.mulesoft.org/schema/mule/super-heros-bio-data-sapi/current/mule-super-heros-bio-data-sapi.xsd">
+	<flow name="get-tickets-data-by-bid" doc:id="053a84b2-0270-4b80-893f-aa4bf9c180a7" >
+		<logger level="INFO" doc:name="Log Correlation ID" doc:id="11d405d3-6f71-44b3-92c0-c2dca07b7168" message="#['\n********************************************\n' ++ 'Flow started with correlation id - ' ++ correlationId ++  '\n********************************************\n']"/>
+		<super-heros-movies-data-sapi:fetch-movies-data-using-cid doc:name="Fetch Movies Data using CID" doc:id="0c8efdb4-8701-4b76-8ae4-28a091059368" config-ref="superHerosMoviesDataSAPIConfig" id="#[vars.CID]" target="superMovies"/>
+		<super-heros-bio-data-sapi:get-biodata-by-cid doc:name="Get BioData by CID" doc:id="dca1e9a9-41e4-4ef6-9f47-5da1f60e8a98" config-ref="superHerosBioDataSAPIConfig" id="#[vars.CID]" target="superBioData"/>
+		<ee:transform>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ticket: {
+    booking_id: "BID7890",
+    film_name: "Avengers - Infinity War",
+    cinema_name: "Acme IMAX",
+    screen_name: "Audi 7",
+    seats: "RR - H4",
+    imdb_rating: 8.9,
+    language: "English",
+    date_time: "Tue, 08 Feb, 2022 | 04:26 PM"
+  },
+  character: {
+    id: "MARVEL0002",
+    name: "Thanos",
+    birthplace: "Titan",
+    publisher: "Marvel Comics",
+    movies: [
+      {
+        name: "Avengers Endgame,",
+        year: 2019
+      }, 
+      {
+        name: "Guardians of the Galaxy",
+        year: 2014
+      }
+    ]
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

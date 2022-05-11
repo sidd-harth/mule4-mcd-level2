@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-test-suite.xml" />
+	<munit:test
+		name="munit-test-success-path"
+		doc:id="8dbc94e4-a6ea-4892-94f1-458bea018f38"
+		tags="UNIT-TEST"
+		description="Testing the mashup flow for success responses">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="ReqRes Mock"
+				doc:id="c8facd45-d7b4-4afc-8d15-c26d59c92afb"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="18b4b823-144c-4b64-badc-d68b0d3e8382"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:variables>
+						<munit-tools:variable
+							key="reqres"
+							value="#[output application/json --- read(MunitTools::getResourceAsString('reqres-user-response.json'),'application/json')]"
+							mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Quotes Mock"
+				doc:id="e748736c-f3f0-421e-b511-d024e16d1b5c"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="4e12876c-730a-4cc4-b609-f0a14370509f"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:variables>
+						<munit-tools:variable
+							key="quotes"
+							value="#[output application/json --- read(MunitTools::getResourceAsString('quotes-response.json'),'application/json')]"
+							mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="HttpBin Mock"
+				doc:id="d453265d-b7a8-45b1-a155-a9d0c2631c0a"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="af4b30b3-c10a-4350-8c5a-988aa808b662"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:variables>
+						<munit-tools:variable
+							key="httpBin"
+							value="#[' ']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event
+				doc:name="Set Payload and QueryParam"
+				doc:id="77d8964a-6986-40bc-9f87-da1089fd69c2">
+				<munit:payload
+					value="#[output application/json --- read(MunitTools::getResourceAsString('reqres-user-request.json'),'application/json')]" />
+				<munit:attributes
+					value="#[{queryParams:{statusCode:200}}]" />
+			</munit:set-event>
+			<flow-ref
+				doc:name="mashup-flow"
+				doc:id="9bf0de81-80f9-4f11-8db0-61f2b9b90e9d"
+				name="mashup-flow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify ReqRes" doc:id="effa9388-b48f-420f-ad4d-4337303e70f5" processor="http:request" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="18b4b823-144c-4b64-badc-d68b0d3e8382" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify HttpBin" doc:id="e2eedc93-8614-454a-bee7-a495524ba82a" processor="http:request" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="af4b30b3-c10a-4350-8c5a-988aa808b662" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Quotes" doc:id="5f023fd4-cc97-4b8f-9de0-0fca0992454a" processor="http:request" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4e12876c-730a-4cc4-b609-f0a14370509f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that
+				doc:name="Assert that Payload is NOT Null"
+				doc:id="1a0dd4c4-e9b3-4f01-9f0e-52dd02a885e5"
+				message="Payload is null"
+				expression="#[payload]"
+				is="#[MunitTools::notNullValue()]" />
+			<munit-tools:assert-that
+				doc:name="Assert that Payload Name field is Concatenated"
+				doc:id="206c1923-ba07-48d8-bdad-5c69442cce74"
+				expression="#[payload.name]"
+				is="#[MunitTools::equalTo('Chuck Norris')]"
+				message="Payload name is not properly concatenated as expected" />
+			<munit-tools:assert-that
+				doc:name="Assert Mashup Response"
+				doc:id="e9f7ac0e-8b7d-40b2-8c83-c77dc175d606"
+				message="Assertion failed in mashup reponse"
+				expression="#[payload]"
+				is="#[MunitTools::equalTo(read(MunitTools::getResourceAsString('mashup-response.json'),'application/json'))]" />
+		</munit:validation>
+	</munit:test>
+</mule>

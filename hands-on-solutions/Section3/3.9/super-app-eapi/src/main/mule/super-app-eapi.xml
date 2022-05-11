@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<secure-properties:config
+		name="securePropertiesConfig"
+		doc:name="Secure Properties Config"
+		doc:id="323f8fa5-ec68-4dcf-9c11-f884ae34951b"
+		file="properties-apmq-secure.yaml"
+		key="${secure.key.apmq}">
+		<secure-properties:encrypt
+			algorithm="Rijndael"
+			mode="ECB" />
+	</secure-properties:config>
+
+	<anypoint-mq:config
+		name="anypointMQConfig"
+		doc:name="Anypoint MQ Config"
+		doc:id="39089c97-7015-4f22-964c-ed60bab0198f">
+		<anypoint-mq:connection
+			url="${secure::mq.url}"
+			clientId="${secure::mq.client_id}"
+			clientSecret="${secure::mq.client_secret}" />
+	</anypoint-mq:config>
+	<flow name="super-app-eapiFlow" doc:id="437b4e57-e000-4243-96eb-2814e617b6db" >
+		<anypoint-mq:subscriber doc:name="Subscriber" doc:id="0ea7ca7d-7a07-448c-8583-47c5e2066adb" config-ref="anypointMQConfig" destination="${secure::mq.destination}" acknowledgementMode="MANUAL" acknowledgementTimeout="10" acknowledgementTimeoutUnit="SECONDS"/>
+		<ee:transform doc:name="Transform Message" doc:id="daf528b9-fc63-4925-ab69-9587715ba133" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.bid,
+	num: payload.mobile
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5e6ad917-d6cf-4ace-9033-b3821539291f" message="#[payload]"/>
+		<set-variable value="#[attributes.ackToken]" doc:name="ackToken" doc:id="592b4aad-1c38-4c02-8f66-15fc47a8ec9b" variableName="ackToken"/>
+		<anypoint-mq:ack doc:name="Ack" doc:id="4832456c-e990-4ab8-b620-d0a38aee41ce" config-ref="anypointMQConfig" ackToken="#[vars.ackToken]"/>
+	</flow>
+
+</mule>

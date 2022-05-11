@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "cancelShowNotification": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string"
+        },
+        "user_mobile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "booking_id",
+        "user_mobile"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "cancelShowNotification"
+  ]
+}

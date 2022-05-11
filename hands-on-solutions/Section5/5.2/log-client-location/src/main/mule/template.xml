@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:http-policy="http://www.mulesoft.org/schema/mule/http-policy"
+	xmlns:http-transform="http://www.mulesoft.org/schema/mule/http-policy-transform"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+               http://www.mulesoft.org/schema/mule/http-policy http://www.mulesoft.org/schema/mule/http-policy/current/mule-http-policy.xsd
+               http://www.mulesoft.org/schema/mule/http-policy-transform http://www.mulesoft.org/schema/mule/http-policy-transform/current/mule-http-policy-transform.xsd">
+
+
+	<http-policy:proxy
+		name="{{{policyId}}}-custom-policy">
+		<http-policy:source>
+			
+			<set-variable
+				value="{{{ipAddress}}}"
+				variableName="ipAddressVariable" />
+
+
+			<http:request
+				method="GET"
+				url="https://ipapi.co/{clientIP}/json/"
+				target="ipResponse">
+				<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"clientIP" : vars.ipAddressVariable
+}]]]></http:uri-params>
+			</http:request>
+
+			<logger
+				level="INFO"
+				message="#[%dw 2.0
+&#10;output text/plain
+&#10;---
+&#10;'\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\nRequest Originated from ' ++ upper(vars.ipResponse.city) ++ ' city, within '  ++ upper(vars.ipResponse.region) ++ ' state of ' ++ upper(vars.ipResponse.country_name) ++ ' (' ++ vars.ipResponse.country_capital ++ ') ' ++ 'in ' ++ upper(vars.ipResponse.timezone) ++  ' timezone.' ++ '\n*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*']" />
+
+
+
+			<http-policy:execute-next />
+
+
+		</http-policy:source>
+	</http-policy:proxy>
+</mule>

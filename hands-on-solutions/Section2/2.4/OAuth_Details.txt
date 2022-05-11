@@ -1,0 +1,11 @@
+curl --request POST 'https://onlineman477-eval-prod.apigee.net/owasp-oauth/token' \
+--header 'Authorization: Basic S1oyNVRwSE5lcHBWT213dEtwRDZqUUFqbnE0dnJMRzE6Q1lCcFZZaFNlcVN5NEdTUg==' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials'
+
+token endpoint - https://onlineman477-eval-prod.apigee.net/owasp-oauth/token
+client id - KZ25TpHNeppVOmwtKpD6jQAjnq4vrLG1
+client secret - CYBpVYhSeqSy4GSR
+
+
+backend url - https://onlineman477-eval-prod.apigee.net/booking/BID7890

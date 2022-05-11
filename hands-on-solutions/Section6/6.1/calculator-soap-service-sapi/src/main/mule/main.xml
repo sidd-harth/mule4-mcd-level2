@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mule
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/apikit-soap http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:listener-config
+		name="api-httpListenerConfig">
+		<http:listener-connection
+			host="0.0.0.0"
+			port="8081"
+			protocol="HTTP">
+			
+		</http:listener-connection>
+	</http:listener-config>
+	<apikit-soap:config
+		httpStatusVarName="httpStatus"
+		name="soapkit-config"
+		port="CalculatorSoap"
+		service="Calculator"
+		wsdlLocation="http://www.dneonline.com/calculator.asmx?WSDL" />
+	<flow name="api-main">
+		<http:listener
+			config-ref="api-httpListenerConfig"
+			path="/Calculator/CalculatorSoap">
+			<http:response
+				statusCode="#[attributes.additionalTransportData.statusCode default 200]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response
+				statusCode="#[attributes.additionalTransportData.statusCode default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit-soap:router config-ref="soapkit-config">
+			<apikit-soap:message>#[payload]</apikit-soap:message>
+			<apikit-soap:attributes>#[
+				%dw 2.0
+				output application/java
+				---
+				{
+				headers: attributes.headers,
+				method: attributes.method,
+				queryString: attributes.queryString
+				}]</apikit-soap:attributes>
+		</apikit-soap:router>
+	</flow>
+	<flow name="Add:\soapkit-config">
+		<logger
+			level="INFO"
+			doc:name="Flow Started"
+			doc:id="a2c267f0-5be3-416b-a24f-e256ca393e10"
+			message="Flow Started" />
+		<logger
+			level="INFO"
+			doc:name="correlationId"
+			doc:id="8adf9ade-5dfe-4aa6-bd8f-7c2f893b2d7d"
+			message="#['\n******************************************************\n '++ correlationId ++' \n******************************************************']" />
+		<ee:transform>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns ns01 http://tempuri.org/
+---
+{
+    body: {
+        ns01#Add: {
+			AddResponse: payload.body.ns01#Add.intA + payload.body.ns01#Add.intB
+		}
+    } write "application/xml"
+}]]>
+				</ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger
+			level="INFO"
+			doc:name="Flow End"
+			doc:id="3522b7c2-f040-48d6-884a-30564c5ab5b1"
+			message="Flow End" />
+
+	</flow>
+
+</mule>
