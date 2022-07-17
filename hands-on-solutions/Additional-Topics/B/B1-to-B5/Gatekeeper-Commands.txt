@@ -1,0 +1,9 @@
+Curl Command - while loop
+
+while true; do curl -s  -w "%{http_code}" localhost:8081/api/laptops  | grep --color -E '200|$' ; sleep .1; done
+
+
+
+VM argument for Anypoint Studio
+-M-Danypoint.platform.gatekeeper=strict
+
